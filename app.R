@@ -3,6 +3,7 @@ library(shinyWidgets)
 library(sf)
 library(tidygeocoder)
 library(dplyr)
+library(leaflet)  # Add this line to load the leaflet package
 
 # Load shapefiles
 township_shapes <- st_read("./data/Long_Island_Cities_Towns.shp")
@@ -13,19 +14,27 @@ township_shapes <- st_transform(township_shapes, crs = 4326)
 county_shapes <- st_transform(county_shapes, crs = 4326)
 
 ui <- fluidPage(
-  titlePanel("Address Geocoder"),
+  titlePanel("Township Finder"),
   sidebarLayout(
     sidebarPanel(
-      textInput("street", "Street Address"),
-      textInput("city", "City"),
+      textInput("street", "Street Address (ex. 123 Kings Park Blvd)"),
+      textInput("city", "City (in New York only, ex. Kings Park)"),
       actionButton("submit", "Geocode")
     ),
     mainPanel(
       textOutput("matched_address"),
       textOutput("township"),
-      textOutput("county")
+      textOutput("county"),
+      leafletOutput("map")  # Add a leaflet output
     )
-  )
+  ),
+  HTML("<p>This app helps you find the township/city and county of a given address on Long Island, New York. When you enter a street address and city, it uses the US Census Bureau's Geocoding Services API to geocode the address and determine its geographic coordinates. It then compares those coordinates with the boundaries of New York State's civil divisions (townships/cities and counties) using shapefiles to determine which specific township/city and county the address falls within.</p>
+
+<p>The app handles situations where a zip code spans multiple towns or when an address is located within a city like Glen Cove. It provides the matched address from the geocoding API, as well as the township/city and county names for the given address.</p>
+
+<p>It's important to note that the app's accuracy depends on the quality of the geocoding service and the shapefiles used. For addresses that cannot be geocoded or that fall outside of Long Island or New York State, the app will indicate that the address is not found or outside the covered area.</p>
+
+<p>For more information on administrative divisions in New York State, visit <a href='https://en.wikipedia.org/wiki/Administrative_divisions_of_New_York_(state)#Town' target='_blank'>this Wikipedia page</a>.</p>")
 )
 
 server <- function(input, output, session) {
@@ -61,10 +70,17 @@ server <- function(input, output, session) {
       paste("Full Address: ", matched_address, sep = "")
     })
     output$township <- renderText({
-      paste("Township/City: ", ifelse(length(township) > 0, township, "Not found"), sep = "")
+      paste("Township/City: ", ifelse(length(township) > 0, township, "Address is outside of Long Island or not found"), sep = "")
     })
     output$county <- renderText({
-      paste("County: ", ifelse(length(county) > 0, county, "Not found"), sep = "")
+      paste("County: ", ifelse(length(county) > 0, county, "Address is outside of New York or not found"), sep = "")
+    })
+    
+    # Render map
+    output$map <- renderLeaflet({
+      leaflet() %>%
+        addTiles() %>%
+        addMarkers(lng = lon, lat = lat, popup = matched_address)
     })
   })
 }
