@@ -18,7 +18,7 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       textInput("street", "Street Address (ex. 123 Kings Park Blvd)"),
-      textInput("city", "City in New York"),
+      textInput("city", "City (in New York only)"),
       actionButton("submit", "Geocode")
     ),
     mainPanel(
