@@ -1,6 +1,6 @@
 library(shiny)
-library(shinyWidgets)
 library(sf)
+library(shinyWidgets)
 library(tidygeocoder)
 library(dplyr)
 library(leaflet)  # Add this line to load the leaflet package

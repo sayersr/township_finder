@@ -1,0 +1,10 @@
+name: township_finder
+title:
+username: kingspark
+account: kingspark
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12216029
+bundleId: 8772496
+url: https://kingspark.shinyapps.io/township_finder/
+version: 1
